@@ -1,14 +1,14 @@
 import { registerWebModule, NativeModule } from 'expo';
 
-import { ExpoApplinksModuleEvents } from './ExpoApplinks.types';
+import { ExpoApplinksModuleEvents, AppLinksConfig } from './ExpoApplinks.types';
 
 class ExpoApplinksModule extends NativeModule<ExpoApplinksModuleEvents> {
-  PI = Math.PI;
-  async setValueAsync(value: string): Promise<void> {
-    this.emit('onChange', { value });
+  async initialize(config: AppLinksConfig): Promise<void> {
+    console.warn('ExpoApplinks: Web platform is not supported. Deep links will not work.');
   }
-  hello() {
-    return 'Hello world! 👋';
+  
+  getVersion(): string {
+    return '1.0.0-web';
   }
 }
 

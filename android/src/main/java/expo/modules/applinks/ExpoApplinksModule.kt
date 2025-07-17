@@ -2,49 +2,137 @@ package expo.modules.applinks
 
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
-import java.net.URL
+import expo.modules.kotlin.Promise
+import expo.modules.kotlin.exception.Exceptions
+import com.applinks.android.AppLinksSDK
+import com.applinks.android.AppLinksSDKBuilder
+import com.applinks.android.handlers.LinkHandlingResult
+import com.applinks.android.AppLinksSDKVersion
+import android.net.Uri
+import android.os.Handler
+import android.os.Looper
 
 class ExpoApplinksModule : Module() {
-  // Each module class must implement the definition function. The definition consists of components
-  // that describes the module's functionality and behavior.
-  // See https://docs.expo.dev/modules/module-api for more details about available components.
+  private var linkListener: AppLinksSDK.AppLinksListener? = null
+  private val mainHandler = Handler(Looper.getMainLooper())
+  
   override fun definition() = ModuleDefinition {
-    // Sets the name of the module that JavaScript code will use to refer to the module. Takes a string as an argument.
-    // Can be inferred from module's class name, but it's recommended to set it explicitly for clarity.
-    // The module will be accessible from `requireNativeModule('ExpoApplinks')` in JavaScript.
     Name("ExpoApplinks")
 
-    // Sets constant properties on the module. Can take a dictionary or a closure that returns a dictionary.
-    Constants(
-      "PI" to Math.PI
-    )
-
-    // Defines event names that the module can send to JavaScript.
-    Events("onChange")
-
-    // Defines a JavaScript synchronous function that runs the native code on the JavaScript thread.
-    Function("hello") {
-      "Hello world! 👋"
+    Events("onLinkHandled")
+    
+    OnStartObserving {
+      setupLinkListener()
+    }
+    
+    OnStopObserving {
+      removeLinkListener()
     }
 
-    // Defines a JavaScript function that always returns a Promise and whose native code
-    // is by default dispatched on the different thread than the JavaScript runtime runs on.
-    AsyncFunction("setValueAsync") { value: String ->
-      // Send an event to JavaScript.
-      sendEvent("onChange", mapOf(
-        "value" to value
-      ))
-    }
-
-    // Enables the module to be used as a native view. Definition components that are accepted as part of
-    // the view definition: Prop, Events.
-    View(ExpoApplinksView::class) {
-      // Defines a setter for the `url` prop.
-      Prop("url") { view: ExpoApplinksView, url: URL ->
-        view.webView.loadUrl(url.toString())
+    AsyncFunction("initialize") { config: Map<String, Any>, promise: Promise ->
+      try {
+        val apiKey = config["apiKey"] as? String ?: throw Exception("API key is required")
+        
+        val logLevel = when (config["logLevel"] as? String) {
+          "none" -> "none"
+          "error" -> "error"
+          "warning" -> "warning"
+          "info" -> "info"
+          "debug" -> "debug"
+          else -> "info"
+        }
+        
+        val context = appContext.reactContext ?: throw Exceptions.AppContextLost()
+        
+        // Get plugin configuration from manifest
+        val metadata = context.packageManager.getApplicationInfo(
+          context.packageName,
+          android.content.pm.PackageManager.GET_META_DATA
+        ).metaData
+        
+        val supportedDomains = metadata?.getString("com.applinks.supportedDomains")?.split(",") ?: emptyList()
+        val supportedSchemes = metadata?.getString("com.applinks.supportedSchemes")?.split(",") ?: emptyList()
+        
+        // Initialize AppLinksSDK
+        val sdk = AppLinksSDK.builder(context)
+          .apiKey(apiKey)
+          .apply {
+            if (supportedDomains.isNotEmpty()) {
+              supportedDomains(*supportedDomains.toTypedArray())
+            }
+            if (supportedSchemes.isNotEmpty()) {
+              supportedSchemes(*supportedSchemes.toTypedArray())
+            }
+          }
+          .build()
+        
+        // Mark SDK as initialized and process any pending URLs
+        ExpoApplinksPlugin.markSDKInitialized()
+        
+        promise.resolve(null)
+      } catch (e: Exception) {
+        promise.reject("InitializationError", e.message, e)
       }
-      // Defines an event that the view can send to JavaScript.
-      Events("onLoad")
+    }
+
+    Function("getVersion") {
+      return@Function AppLinksSDKVersion.current
+    }
+  }
+  
+  private fun setupLinkListener() {
+    if (linkListener == null) {
+      linkListener = object : AppLinksSDK.AppLinksListener {
+        override fun onLinkReceived(result: LinkHandlingResult) {
+          sendLinkResult(result)
+        }
+        
+        override fun onError(error: String) {
+          val errorResult = mapOf(
+            "handled" to false,
+            "originalUrl" to "",
+            "path" to "",
+            "params" to emptyMap<String, String>(),
+            "metadata" to emptyMap<String, Any>(),
+            "error" to error
+          )
+          mainHandler.post {
+            sendEvent("onLinkHandled", errorResult)
+          }
+        }
+      }
+      
+      try {
+        AppLinksSDK.getInstance().addLinkListener(linkListener!!)
+      } catch (e: Exception) {
+        // SDK not initialized yet
+      }
+    }
+  }
+  
+  private fun removeLinkListener() {
+    linkListener?.let {
+      try {
+        AppLinksSDK.getInstance().removeLinkListener(it)
+      } catch (e: Exception) {
+        // SDK not initialized
+      }
+      linkListener = null
+    }
+  }
+  
+  private fun sendLinkResult(result: LinkHandlingResult) {
+    val eventData = mapOf(
+      "handled" to result.handled,
+      "originalUrl" to result.originalUrl.toString(),
+      "path" to result.path,
+      "params" to result.params,
+      "metadata" to result.metadata,
+      "error" to result.error
+    )
+    
+    mainHandler.post {
+      sendEvent("onLinkHandled", eventData)
     }
   }
 }

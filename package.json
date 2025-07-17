@@ -4,9 +4,21 @@
   "description": "A React Native SDK for handling deferred deep links across iOS and Android. It uses clipboard-based attribution on iOS (similar to the deprecated Firebase Dynamic Links) and leverages the Play Store Install Referrer API on Android for reliable attribution.",
   "main": "build/index.js",
   "types": "build/index.d.ts",
+  "files": [
+    "build",
+    "plugin/build",
+    "ios",
+    "android",
+    "expo-module.config.json",
+    "app.plugin.js"
+  ],
+  "expo": {
+    "plugin": "plugin/build/index.js"
+  },
   "scripts": {
-    "build": "expo-module build",
-    "clean": "expo-module clean",
+    "build": "expo-module build && npm run build:plugin",
+    "build:plugin": "tsc --project plugin/tsconfig.json",
+    "clean": "expo-module clean && rm -rf plugin/build",
     "lint": "expo-module lint",
     "test": "expo-module test",
     "prepare": "expo-module prepare",
@@ -28,12 +40,15 @@
   "author": "Maxence Henneron <maxence@appsent.com> (https://github.com/applinksdev)",
   "license": "MIT",
   "homepage": "https://github.com/applinksdev/expo-applinks#readme",
-  "dependencies": {},
+  "dependencies": {
+    "@expo/config-plugins": "^8.0.0"
+  },
   "devDependencies": {
     "@types/react": "~19.0.0",
     "expo-module-scripts": "^4.1.9",
     "expo": "~53.0.0",
-    "react-native": "0.79.1"
+    "react-native": "0.79.1",
+    "typescript": "^5.0.0"
   },
   "peerDependencies": {
     "expo": "*",

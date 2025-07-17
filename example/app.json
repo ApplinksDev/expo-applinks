@@ -14,7 +14,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "expo.modules.applinks.example"
+      "bundleIdentifier": "com.applinks.AppLinksDemo"
     },
     "android": {
       "adaptiveIcon": {
@@ -22,10 +22,19 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "expo.modules.applinks.example"
+      "package": "com.applinks.AppLinksDemo"
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      [
+        "../app.plugin.js",
+        {
+          "supportedDomains": ["example.onapp.link"],
+          "supportedSchemes": ["applinks"]
+        }
+      ]
+    ]
   }
 }

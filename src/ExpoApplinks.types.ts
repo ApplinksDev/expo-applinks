@@ -1,19 +1,17 @@
-import type { StyleProp, ViewStyle } from 'react-native';
+export type LinkHandlingResult = {
+  handled: boolean;
+  originalUrl: string;
+  path: string;
+  params: Record<string, string>;
+  metadata: Record<string, any>;
+  error?: string;
+};
 
-export type OnLoadEventPayload = {
-  url: string;
+export type AppLinksConfig = {
+  apiKey: string;
+  logLevel?: 'none' | 'error' | 'warning' | 'info' | 'debug';
 };
 
 export type ExpoApplinksModuleEvents = {
-  onChange: (params: ChangeEventPayload) => void;
-};
-
-export type ChangeEventPayload = {
-  value: string;
-};
-
-export type ExpoApplinksViewProps = {
-  url: string;
-  onLoad: (event: { nativeEvent: OnLoadEventPayload }) => void;
-  style?: StyleProp<ViewStyle>;
+  onLinkHandled: (result: LinkHandlingResult) => void;
 };

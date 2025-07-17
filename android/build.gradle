@@ -41,3 +41,7 @@ android {
     abortOnError false
   }
 }
+
+dependencies {
+  implementation 'com.applinks:sdk-android:1.0.1'
+}

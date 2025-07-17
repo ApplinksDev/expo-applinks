@@ -1,4 +1,5 @@
 PODS:
+  - AppLinksSDK (1.0.2)
   - boost (1.84.0)
   - DoubleConversion (1.1.6)
   - EXConstants (17.1.7):
@@ -31,6 +32,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - Yoga
   - ExpoApplinks (0.1.0):
+    - AppLinksSDK (< 2.0, >= 1.0.1)
     - ExpoModulesCore
   - ExpoAsset (11.1.7):
     - ExpoModulesCore
@@ -1805,6 +1807,7 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
+    - AppLinksSDK
     - SocketRocket
 
 EXTERNAL SOURCES:
@@ -1967,11 +1970,12 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
 SPEC CHECKSUMS:
+  AppLinksSDK: fbd9233c4e22d186d86c7df255c14c5262c85266
   boost: 7e761d76ca2ce687f7cc98e698152abd03a18f90
   DoubleConversion: cb417026b2400c8f53ae97020b2be961b59470cb
   EXConstants: 9d62a46a36eae6d28cb978efcbc68aef354d1704
   Expo: 6e2b482fa24909b52b80ba00271e6d7742c1ef9f
-  ExpoApplinks: 422155c5fddb5cbd9c1f8cba91435d4f8d9adfb2
+  ExpoApplinks: 1c79b2f063a38644f612de2dc5bd50ae94fb8155
   ExpoAsset: 7bdbbacf4e6752ae6e3cf70555cee076f6229e6e
   ExpoFileSystem: 9681caebda23fa1b38a12a9c68b2bade7072ce20
   ExpoFont: 091a47eeaa1b30b0b760aa1d0a2e7814e8bf6fe6

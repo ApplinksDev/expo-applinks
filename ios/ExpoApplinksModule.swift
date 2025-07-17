@@ -1,48 +1,77 @@
 import ExpoModulesCore
+import AppLinksSDK
+import Combine
 
 public class ExpoApplinksModule: Module {
-  // Each module class must implement the definition function. The definition consists of components
-  // that describes the module's functionality and behavior.
-  // See https://docs.expo.dev/modules/module-api for more details about available components.
+  private var linkSubscription: AnyCancellable?
+  
   public func definition() -> ModuleDefinition {
-    // Sets the name of the module that JavaScript code will use to refer to the module. Takes a string as an argument.
-    // Can be inferred from module's class name, but it's recommended to set it explicitly for clarity.
-    // The module will be accessible from `requireNativeModule('ExpoApplinks')` in JavaScript.
     Name("ExpoApplinks")
 
-    // Sets constant properties on the module. Can take a dictionary or a closure that returns a dictionary.
-    Constants([
-      "PI": Double.pi
-    ])
-
-    // Defines event names that the module can send to JavaScript.
-    Events("onChange")
-
-    // Defines a JavaScript synchronous function that runs the native code on the JavaScript thread.
-    Function("hello") {
-      return "Hello world! 👋"
-    }
-
-    // Defines a JavaScript function that always returns a Promise and whose native code
-    // is by default dispatched on the different thread than the JavaScript runtime runs on.
-    AsyncFunction("setValueAsync") { (value: String) in
-      // Send an event to JavaScript.
-      self.sendEvent("onChange", [
-        "value": value
-      ])
-    }
-
-    // Enables the module to be used as a native view. Definition components that are accepted as part of the
-    // view definition: Prop, Events.
-    View(ExpoApplinksView.self) {
-      // Defines a setter for the `url` prop.
-      Prop("url") { (view: ExpoApplinksView, url: URL) in
-        if view.webView.url != url {
-          view.webView.load(URLRequest(url: url))
+    Events("onLinkHandled")
+    
+    OnStartObserving {
+      self.linkSubscription = AppLinksSDK.shared.linkPublisher
+        .sink { [weak self] linkResult in
+          self?.sendLinkResult(linkResult)
         }
-      }
-
-      Events("onLoad")
     }
+    
+    OnStopObserving {
+      self.linkSubscription?.cancel()
+    }
+
+    AsyncFunction("initialize") { (config: [String: Any]) in
+      guard let apiKey = config["apiKey"] as? String else {
+        throw Exception(name: "InvalidConfig", description: "API key is required")
+      }
+      
+      let logLevel: AppLinksSDKLogLevel
+      if let logLevelString = config["logLevel"] as? String {
+        switch logLevelString {
+        case "none": logLevel = .none
+        case "error": logLevel = .error
+        case "warning": logLevel = .warning
+        case "info": logLevel = .info
+        case "debug": logLevel = .debug
+        default: logLevel = .info
+        }
+      } else {
+        logLevel = .info
+      }
+      
+      // Get plugin configuration from Info.plist
+      let supportedDomains = Set(Bundle.main.object(forInfoDictionaryKey: "ExpoAppLinksSupportedDomains") as? [String] ?? [])
+      let supportedSchemes = Set(Bundle.main.object(forInfoDictionaryKey: "ExpoAppLinksSupportedSchemes") as? [String] ?? [])
+      
+      // Initialize AppLinksSDK
+      AppLinksSDK.initialize(
+        apiKey: apiKey,
+        supportedDomains: supportedDomains,
+        supportedSchemes: supportedSchemes,
+        logLevel: logLevel
+      )
+      
+      // Mark SDK as initialized and process any pending URLs
+      ExpoApplinksAppDelegate.markSDKInitialized()
+    }
+
+
+    Function("getVersion") {
+      return AppLinksSDK.version
+    }
+  }
+  
+  private func sendLinkResult(_ result: LinkHandlingResult) {
+    let eventData: [String: Any] = [
+      "handled": result.handled,
+      "originalUrl": result.originalUrl.absoluteString,
+      "path": result.path,
+      "params": result.params,
+      "metadata": result.metadata,
+      "error": result.error as Any
+    ]
+    
+    sendEvent("onLinkHandled", eventData)
   }
 }

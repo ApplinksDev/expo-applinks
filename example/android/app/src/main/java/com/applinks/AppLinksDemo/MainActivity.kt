@@ -1,4 +1,4 @@
-package expo.modules.applinks.example
+package com.applinks.AppLinksDemo
 
 import android.os.Build
 import android.os.Bundle

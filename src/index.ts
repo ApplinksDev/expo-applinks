@@ -1,5 +1,21 @@
-// Reexport the native module. On web, it will be resolved to ExpoApplinksModule.web.ts
-// and on native platforms to ExpoApplinksModule.ts
-export { default } from './ExpoApplinksModule';
-export { default as ExpoApplinksView } from './ExpoApplinksView';
-export * from  './ExpoApplinks.types';
+import ExpoApplinksModule from './ExpoApplinksModule';
+import { AppLinksConfig, LinkHandlingResult } from './ExpoApplinks.types';
+
+export * from './ExpoApplinks.types';
+
+export class AppLinks {
+  static async initialize(config: AppLinksConfig): Promise<void> {
+    return ExpoApplinksModule.initialize(config);
+  }
+
+  static getVersion(): string {
+    return ExpoApplinksModule.getVersion();
+  }
+
+  static addLinkListener(listener: (result: LinkHandlingResult) => void): () => void {
+    const subscription = ExpoApplinksModule.addListener('onLinkHandled', listener);
+    return () => subscription.remove();
+  }
+}
+
+export default AppLinks;
