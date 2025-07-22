@@ -5,12 +5,12 @@ import expo.modules.kotlin.modules.ModuleDefinition
 import expo.modules.kotlin.Promise
 import expo.modules.kotlin.exception.Exceptions
 import com.applinks.android.AppLinksSDK
-import com.applinks.android.AppLinksSDKBuilder
 import com.applinks.android.handlers.LinkHandlingResult
 import com.applinks.android.AppLinksSDKVersion
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
+import com.applinks.android.LinkType
 
 class ExpoApplinksModule : Module() {
   private var linkListener: AppLinksSDK.AppLinksListener? = null
@@ -77,6 +77,41 @@ class ExpoApplinksModule : Module() {
 
     Function("getVersion") {
       return@Function AppLinksSDKVersion.current
+    }
+
+    AsyncFunction("createLink") { params: Map<String, Any>, promise: Promise ->
+      try {
+        val domain = params["domain"] as? String ?: throw Exception("Domain is required")
+        val type = params["type"] as? String ?: "short"
+        val title = params["title"] as? String ?: throw Exception("Title is required")
+        val deepLinkPath = params["deepLinkPath"] as? String ?: throw Exception("Deep link path is required")
+        val deepLinkParams = params["deepLinkParams"] as? Map<String, String> ?: emptyMap()
+        val webLink = params["web_link"] as? String
+        val expiresAt = params["expiresAt"] as? Long // Unix timestamp in milliseconds
+        
+        AppLinksSDK.getInstance().linkShortener.createLinkAsync {
+          this.webLink = webLink?.let { Uri.parse(it) }
+          this.domain = domain
+          this.title = title
+          this.deepLinkPath = deepLinkPath
+          this.deepLinkParams = deepLinkParams
+          linkType = when (type) {
+            "unguessable" -> LinkType.UNGUESSABLE
+            "short" -> LinkType.SHORT
+            else -> LinkType.SHORT
+          }
+          expiresAt?.let {
+            this.expiresAt = it
+          }
+        }.addOnSuccessListener { result ->
+          val (shortLink) = result
+          promise.resolve(shortLink)
+        }.addOnFailureListener { exception ->
+          promise.reject("CreateLinkError", exception.message ?: "Failed to create link", exception)
+        }
+      } catch (e: Exception) {
+        promise.reject("CreateLinkError", e.message, e)
+      }
     }
   }
   

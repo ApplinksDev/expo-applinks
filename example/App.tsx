@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import AppLinks, { LinkHandlingResult } from 'expo-applinks';
-import { Alert, SafeAreaView, ScrollView, Text, View } from 'react-native';
+import { Alert, Button, Linking, SafeAreaView, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 // Initialize AppLinks SDK at module level
 AppLinks.initialize({
@@ -13,6 +13,7 @@ AppLinks.initialize({
 export default function App() {
   const [lastLink, setLastLink] = useState<LinkHandlingResult | null>(null);
   const [version] = useState(AppLinks.getVersion());
+  const [createdLink, setCreatedLink] = useState<string | null>(null);
 
   useEffect(() => {
     const removeListener = AppLinks.addLinkListener((result: LinkHandlingResult) => {
@@ -30,6 +31,28 @@ export default function App() {
 
     return removeListener;
   }, []);
+
+  const handleCreateLink = async () => {
+    try {
+      const link = await AppLinks.createLink({
+        domain: 'example.onapp.link',
+        type: 'short',
+        title: 'Check out this product!',
+        deepLinkPath: 'product/special-offer',
+        deepLinkParams: {
+          discount: '20',
+          code: 'SAVE20'
+        },
+        web_link: 'https://example.com/products/special',
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // Expires in 7 days
+      });
+      
+      setCreatedLink(link);
+      Alert.alert('Link Created!', link);
+    } catch (error) {
+      Alert.alert('Error', `Failed to create link: ${error}`);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -68,6 +91,20 @@ export default function App() {
             </View>
           ) : (
             <Text style={[styles.text, { fontStyle: 'italic' }]}>No links received yet</Text>
+          )}
+        </Group>
+
+        <Group name="Create Link">
+          <Button title="Create Dynamic Link" onPress={handleCreateLink} />
+          {createdLink && (
+            <View style={{ marginTop: 10 }}>
+              <Text style={styles.text}>Created Link:</Text>
+              <TouchableOpacity onPress={() => Linking.openURL(createdLink)}>
+                <Text style={[styles.text, { fontSize: 14, color: '#007AFF', textDecorationLine: 'underline' }]}>
+                  {createdLink}
+                </Text>
+              </TouchableOpacity>
+            </View>
           )}
         </Group>
 

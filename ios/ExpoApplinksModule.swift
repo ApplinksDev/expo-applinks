@@ -56,6 +56,44 @@ public class ExpoApplinksModule: Module {
       ExpoApplinksAppDelegate.markSDKInitialized()
     }
 
+    AsyncFunction("createLink") { (params: [String: Any]) -> String in
+      guard let domain = params["domain"] as? String,
+            let type = params["type"] as? String,
+            let title = params["title"] as? String,
+            let deepLinkPath = params["deepLinkPath"] as? String else {
+        throw Exception(name: "InvalidParams", description: "Required parameters are missing")
+      }
+      
+      let linkType: LinkType
+      switch type {
+      case "unguessable":
+        linkType = .unguessable
+      case "short":
+        linkType = .short
+      default:
+        throw Exception(name: "InvalidParams", description: "Invalid link type")
+      }
+      
+      let deepLinkParams = params["deepLinkParams"] as? [String: String] ?? [:]
+      let webLink = params["web_link"] as? String
+      
+      var expirationDate: Date? = nil
+      if let expirationTimestamp = params["expiration_date"] as? Double {
+        expirationDate = Date(timeIntervalSince1970: expirationTimestamp / 1000)
+      }
+      
+      return try await AppLinksSDK.shared.linkShortener.createLink(
+        LinkCreationParams(
+            domain: domain,
+            title: title,
+            deepLinkPath: deepLinkPath,
+            webLink: webLink,
+            deepLinkParams: deepLinkParams,
+            expiresAt: expirationDate,
+            linkType: linkType
+        )
+      ).fullUrl
+    }
 
     Function("getVersion") {
       return AppLinksSDK.version
