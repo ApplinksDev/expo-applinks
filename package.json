@@ -1,6 +1,6 @@
 {
   "name": "expo-applinks",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A React Native SDK for handling deferred deep links across iOS and Android. It uses clipboard-based attribution on iOS (similar to the deprecated Firebase Dynamic Links) and leverages the Play Store Install Referrer API on Android for reliable attribution.",
   "main": "build/index.js",
   "types": "build/index.d.ts",
