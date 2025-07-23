@@ -9,7 +9,8 @@ import java.util.concurrent.ConcurrentLinkedQueue
 object ExpoApplinksPlugin {
   private var isSDKInitialized = false
   private val pendingUrls = ConcurrentLinkedQueue<Uri>()
-  
+  var initialLink: Uri? = null
+
   fun markSDKInitialized() {
     isSDKInitialized = true
     processPendingUrls()
@@ -17,6 +18,10 @@ object ExpoApplinksPlugin {
   
   fun handleIntent(activity: Activity, intent: Intent) {
     intent.data?.let { uri ->
+      if (initialLink == null) {
+        initialLink = uri
+      }
+
       if (isSDKInitialized) {
         try {
           AppLinksSDK.getInstance().handleLink(uri)

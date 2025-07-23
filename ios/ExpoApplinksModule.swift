@@ -4,7 +4,7 @@ import Combine
 
 public class ExpoApplinksModule: Module {
   private var linkSubscription: AnyCancellable?
-  
+    
   public func definition() -> ModuleDefinition {
     Name("ExpoApplinks")
 
@@ -97,6 +97,40 @@ public class ExpoApplinksModule: Module {
 
     Function("getVersion") {
       return AppLinksSDK.version
+    }
+    
+    AsyncFunction("getAppLinkDetails") { (url: String) -> [String: Any]? in
+      guard let url = URL(string: url) else {
+        return nil
+      }
+      
+      let handledLink = await AppLinksSDK.shared.getAppLinkDetails(from: url)
+      return [
+        "handled": handledLink.handled,
+        "originalUrl": handledLink.originalUrl.absoluteString,
+        "path": handledLink.path,
+        "params": handledLink.params,
+        "metadata": handledLink.metadata,
+        "error": handledLink.error as Any
+      ]
+    }
+    
+    AsyncFunction("getInitialLink") { () -> [String: Any]? in
+      guard let link = await ExpoApplinksAppDelegate.initialLink else { return nil }
+      
+      let handledLink = await AppLinksSDK.shared.getAppLinkDetails(from: link)
+      if (!handledLink.handled) {
+        return nil
+      }
+        
+      return [
+        "handled": handledLink.handled,
+        "originalUrl": handledLink.originalUrl.absoluteString,
+        "path": handledLink.path,
+        "params": handledLink.params,
+        "metadata": handledLink.metadata,
+        "error": handledLink.error as Any
+      ]
     }
   }
   

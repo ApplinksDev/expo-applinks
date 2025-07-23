@@ -29,6 +29,15 @@ export class AppLinks {
     });
   }
 
+  static getAppLinkDetails(url: string): Promise<LinkHandlingResult> {
+    return ExpoApplinksModule.getAppLinkDetails(url);
+  }
+
+
+  static getInitialLink(): Promise<LinkHandlingResult | null> {
+    return ExpoApplinksModule.getInitialLink();
+  }
+
   static addLinkListener(listener: (result: LinkHandlingResult) => void): () => void {
     const subscription = ExpoApplinksModule.addListener('onLinkHandled', listener);
     return () => subscription.remove();

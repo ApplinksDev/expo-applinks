@@ -5,12 +5,16 @@ import expo.modules.kotlin.modules.ModuleDefinition
 import expo.modules.kotlin.Promise
 import expo.modules.kotlin.exception.Exceptions
 import com.applinks.android.AppLinksSDK
-import com.applinks.android.handlers.LinkHandlingResult
 import com.applinks.android.AppLinksSDKVersion
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import com.applinks.android.LinkType
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import androidx.core.net.toUri
+import com.applinks.android.middleware.LinkHandlingResult
 
 class ExpoApplinksModule : Module() {
   private var linkListener: AppLinksSDK.AppLinksListener? = null
@@ -77,6 +81,63 @@ class ExpoApplinksModule : Module() {
 
     Function("getVersion") {
       return@Function AppLinksSDKVersion.current
+    }
+
+    AsyncFunction("getAppLinkDetails") { uri: String, promise: Promise ->
+      CoroutineScope(Dispatchers.IO).launch {
+        try {
+          val handledLink = AppLinksSDK.getInstance().getAppLinkDetails(uri.toUri())
+          if (!handledLink.handled) {
+            promise.resolve(null)
+            return@launch
+          }
+
+          val result = mapOf(
+            "handled" to handledLink.handled,
+            "originalUrl" to handledLink.originalUrl.toString(),
+            "path" to handledLink.path,
+            "params" to handledLink.params,
+            "metadata" to handledLink.metadata,
+            "error" to handledLink.error
+          )
+
+          promise.resolve(result)
+        } catch (e: Exception) {
+          promise.resolve(e.message ?: "Failed to retrieve link")
+        }
+      }
+    }
+
+    AsyncFunction("getInitialLink") { promise: Promise ->
+      val initialLink = ExpoApplinksPlugin.initialLink
+      if (initialLink == null) {
+        promise.resolve(null)
+        return@AsyncFunction
+      }
+      
+      // Launch coroutine to call suspend function
+      CoroutineScope(Dispatchers.IO).launch {
+        try {
+          val handledLink = AppLinksSDK.getInstance().getAppLinkDetails(initialLink)
+          if (!handledLink.handled) {
+            promise.resolve(null)
+            return@launch
+          }
+          
+          val result = mapOf(
+            "handled" to handledLink.handled,
+            "originalUrl" to handledLink.originalUrl.toString(),
+            "path" to handledLink.path,
+            "params" to handledLink.params,
+            "metadata" to handledLink.metadata,
+            "error" to handledLink.error
+          )
+
+          promise.resolve(result)
+        } catch (e: Exception) {
+          promise.resolve(null)
+        }
+      }
     }
 
     AsyncFunction("createLink") { params: Map<String, Any>, promise: Promise ->

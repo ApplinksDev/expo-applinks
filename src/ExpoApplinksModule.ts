@@ -1,10 +1,12 @@
 import { NativeModule, requireNativeModule } from 'expo';
 
-import { ExpoApplinksModuleEvents, AppLinksConfig } from './ExpoApplinks.types';
+import { ExpoApplinksModuleEvents, AppLinksConfig, LinkHandlingResult } from './ExpoApplinks.types';
 
 declare class ExpoApplinksModule extends NativeModule<ExpoApplinksModuleEvents> {
   initialize(config: AppLinksConfig): Promise<void>;
   getVersion(): string;
+  getInitialLink(): Promise<LinkHandlingResult | null>;
+  getAppLinkDetails(url: string): Promise<LinkHandlingResult>;
   createLink(params: {
     domain: string,
     type: 'unguessable' | 'short',

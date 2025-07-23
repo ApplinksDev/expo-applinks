@@ -12,14 +12,21 @@ AppLinks.initialize({
 
 export default function App() {
   const [lastLink, setLastLink] = useState<LinkHandlingResult | null>(null);
+  const [initialLink, setInitialLink] = useState<LinkHandlingResult | null>(null);
   const [version] = useState(AppLinks.getVersion());
   const [createdLink, setCreatedLink] = useState<string | null>(null);
 
   useEffect(() => {
+    AppLinks.getInitialLink().then((result: LinkHandlingResult | null) => {
+      if (result) {
+        setInitialLink(result);
+        setLastLink(result);
+      }
+    });
+
     const removeListener = AppLinks.addLinkListener((result: LinkHandlingResult) => {
-      console.log('Link handled:', result);
       setLastLink(result);
-      
+
       if (result.handled) {
         Alert.alert(
           'Link Received!',
@@ -46,7 +53,7 @@ export default function App() {
         web_link: 'https://example.com/products/special',
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // Expires in 7 days
       });
-      
+
       setCreatedLink(link);
       Alert.alert('Link Created!', link);
     } catch (error) {
@@ -58,7 +65,7 @@ export default function App() {
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.container}>
         <Text style={styles.header}>AppLinks SDK Example</Text>
-        
+
         <Group name="SDK Info">
           <Text style={styles.text}>Version: {version}</Text>
           <Text style={styles.text}>Status: ✅ Initialized</Text>
@@ -71,6 +78,24 @@ export default function App() {
             3. Or copy a link to clipboard and relaunch the app{'\n'}
             4. Watch for link handling events below
           </Text>
+        </Group>
+
+        <Group name="Initial Link">
+          {initialLink ? (
+            <View>
+              <Text style={styles.text}>Handled: {initialLink.handled ? '✅' : '❌'}</Text>
+              <Text style={styles.text}>URL: {initialLink.originalUrl}</Text>
+              <Text style={styles.text}>Path: {initialLink.path}</Text>
+              <Text style={styles.text}>
+                Params: {JSON.stringify(initialLink.params, null, 2)}
+              </Text>
+              {initialLink.error && (
+                <Text style={[styles.text, { color: 'red' }]}>Error: {initialLink.error}</Text>
+              )}
+            </View>
+          ) : (
+            <Text style={[styles.text, { fontStyle: 'italic' }]}>No initial link</Text>
+          )}
         </Group>
 
         <Group name="Last Link Event">
