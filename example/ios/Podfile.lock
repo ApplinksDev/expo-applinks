@@ -31,7 +31,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - ExpoApplinks (1.0.0):
+  - ExpoApplinks (1.0.1):
     - AppLinksSDK (< 2.0, >= 1.0.5)
     - ExpoModulesCore
   - ExpoAsset (11.1.7):
@@ -1975,7 +1975,7 @@ SPEC CHECKSUMS:
   DoubleConversion: cb417026b2400c8f53ae97020b2be961b59470cb
   EXConstants: 9d62a46a36eae6d28cb978efcbc68aef354d1704
   Expo: 6e2b482fa24909b52b80ba00271e6d7742c1ef9f
-  ExpoApplinks: 4437cdd70ad91a6235b8badc4483661b0dfffa55
+  ExpoApplinks: dcac5d1400ace71db87517396a2055afc1ea0889
   ExpoAsset: 7bdbbacf4e6752ae6e3cf70555cee076f6229e6e
   ExpoFileSystem: 9681caebda23fa1b38a12a9c68b2bade7072ce20
   ExpoFont: 091a47eeaa1b30b0b760aa1d0a2e7814e8bf6fe6

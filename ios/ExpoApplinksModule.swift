@@ -74,7 +74,7 @@ public class ExpoApplinksModule: Module {
         throw Exception(name: "InvalidParams", description: "Invalid link type")
       }
       
-      let deepLinkParams = params["deepLinkParams"] as? [String: String] ?? [:]
+      let deepLinkParams = params["deepLinkParams"] as? Dictionary<String, String> ?? [:]
       let webLink = params["web_link"] as? String
       
       var expirationDate: Date? = nil
