@@ -145,17 +145,29 @@ class ExpoApplinksModule : Module() {
         val domain = params["domain"] as? String ?: throw Exception("Domain is required")
         val type = params["type"] as? String ?: "short"
         val title = params["title"] as? String ?: throw Exception("Title is required")
+        val subtitle = params["subtitle"] as? String
         val deepLinkPath = params["deepLinkPath"] as? String ?: throw Exception("Deep link path is required")
         val deepLinkParams = params["deepLinkParams"] as? Map<String, String> ?: emptyMap()
         val webLink = params["web_link"] as? String
         val expiresAt = params["expiresAt"] as? Long // Unix timestamp in milliseconds
+        val backgroundType = params["background_type"] as? String
+        val backgroundColor = params["background_color"] as? String
+        val backgroundColorFrom = params["background_color_from"] as? String
+        val backgroundColorTo = params["background_color_to"] as? String
+        val backgroundColorDirection = params["background_color_direction"] as? String
         
         AppLinksSDK.getInstance().linkShortener.createLinkAsync {
           this.webLink = webLink?.let { Uri.parse(it) }
           this.domain = domain
           this.title = title
+          this.subtitle = subtitle
           this.deepLinkPath = deepLinkPath
           this.deepLinkParams = deepLinkParams
+          this.backgroundType = backgroundType
+          this.backgroundColor = backgroundColor
+          this.backgroundColorFrom = backgroundColorFrom
+          this.backgroundColorTo = backgroundColorTo
+          this.backgroundColorDirection = backgroundColorDirection
           linkType = when (type) {
             "unguessable" -> LinkType.UNGUESSABLE
             "short" -> LinkType.SHORT

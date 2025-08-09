@@ -74,8 +74,14 @@ public class ExpoApplinksModule: Module {
         throw Exception(name: "InvalidParams", description: "Invalid link type")
       }
       
+      let subtitle = params["subtitle"] as? String
       let deepLinkParams = params["deepLinkParams"] as? Dictionary<String, String> ?? [:]
       let webLink = params["web_link"] as? String
+      let backgroundType = params["background_type"] as? String
+      let backgroundColor = params["background_color"] as? String
+      let backgroundColorFrom = params["background_color_from"] as? String
+      let backgroundColorTo = params["background_color_to"] as? String
+      let backgroundColorDirection = params["background_color_direction"] as? String
       
       var expirationDate: Date? = nil
       if let expirationTimestamp = params["expiration_date"] as? Double {
@@ -86,11 +92,17 @@ public class ExpoApplinksModule: Module {
         LinkCreationParams(
             domain: domain,
             title: title,
+            subtitle: subtitle,
             deepLinkPath: deepLinkPath,
             webLink: webLink,
             deepLinkParams: deepLinkParams,
             expiresAt: expirationDate,
-            linkType: linkType
+            linkType: linkType,
+            backgroundType: backgroundType,
+            backgroundColor: backgroundColor,
+            backgroundColorFrom: backgroundColorFrom,
+            backgroundColorTo: backgroundColorTo,
+            backgroundColorDirection: backgroundColorDirection
         )
       ).fullUrl
     }

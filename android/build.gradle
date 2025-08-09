@@ -43,5 +43,5 @@ android {
 }
 
 dependencies {
-  implementation 'com.applinks:sdk-android:1.0.8'
+  implementation 'com.applinks:sdk-android:1.0.9'
 }

@@ -7,10 +7,16 @@ export interface CreateLinkParams {
   domain: string;
   type: 'unguessable' | 'short';
   title: string;
+  subtitle?: string;
   deepLinkPath: string;
   deepLinkParams?: Record<string, string>;
   web_link?: string;
   expiresAt?: Date;
+  background_type?: 'solid' | 'gradient';
+  background_color?: string;
+  background_color_from?: string;
+  background_color_to?: string;
+  background_color_direction?: string;
 }
 
 export class AppLinks {
