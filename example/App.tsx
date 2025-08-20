@@ -5,7 +5,8 @@ import { Alert, Button, Linking, SafeAreaView, ScrollView, Text, TouchableOpacit
 // Initialize AppLinks SDK at module level
 AppLinks.initialize({
   apiKey: 'pk_thund3Qt1SAqvUtJtPzFBYg7aVMJ9BPD',
-  logLevel: 'debug'
+  logLevel: 'debug',
+  autoHandleLinks: true
 }).catch(error => {
   console.error('Failed to initialize AppLinks SDK:', error);
 });

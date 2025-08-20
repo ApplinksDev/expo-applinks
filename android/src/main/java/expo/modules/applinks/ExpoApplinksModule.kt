@@ -36,6 +36,7 @@ class ExpoApplinksModule : Module() {
     AsyncFunction("initialize") { config: Map<String, Any>, promise: Promise ->
       try {
         val apiKey = config["apiKey"] as? String ?: throw Exception("API key is required")
+        val autoHandleLinks = config["autoHandleLinks"] as? Boolean ?: false
         
         val logLevel = when (config["logLevel"] as? String) {
           "none" -> "none"
@@ -71,7 +72,7 @@ class ExpoApplinksModule : Module() {
           .build()
         
         // Mark SDK as initialized and process any pending URLs
-        ExpoApplinksPlugin.markSDKInitialized()
+        ExpoApplinksPlugin.markSDKInitialized(autoHandleLinks)
         
         promise.resolve(null)
       } catch (e: Exception) {

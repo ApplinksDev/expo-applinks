@@ -26,6 +26,8 @@ public class ExpoApplinksModule: Module {
         throw Exception(name: "InvalidConfig", description: "API key is required")
       }
       
+      let autoHandleLinks = config["autoHandleLinks"] as? Bool ?? false
+      
       let logLevel: AppLinksSDKLogLevel
       if let logLevelString = config["logLevel"] as? String {
         switch logLevelString {
@@ -53,7 +55,7 @@ public class ExpoApplinksModule: Module {
       )
       
       // Mark SDK as initialized and process any pending URLs
-      ExpoApplinksAppDelegate.markSDKInitialized()
+      ExpoApplinksAppDelegate.markSDKInitialized(autoHandleLinks: autoHandleLinks)
     }
 
     AsyncFunction("createLink") { (params: [String: Any]) -> String in

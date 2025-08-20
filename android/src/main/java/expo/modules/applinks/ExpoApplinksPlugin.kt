@@ -8,12 +8,19 @@ import java.util.concurrent.ConcurrentLinkedQueue
 
 object ExpoApplinksPlugin {
   private var isSDKInitialized = false
+  private var autoHandleLinks = false
   private val pendingUrls = ConcurrentLinkedQueue<Uri>()
   var initialLink: Uri? = null
 
-  fun markSDKInitialized() {
+  fun markSDKInitialized(autoHandleLinks: Boolean = false) {
+    this.autoHandleLinks = autoHandleLinks
     isSDKInitialized = true
-    processPendingUrls()
+    if (autoHandleLinks) {
+      processPendingUrls()
+    } else {
+      // Clear pending URLs if not auto-handling
+      pendingUrls.clear()
+    }
   }
   
   fun handleIntent(activity: Activity, intent: Intent) {
@@ -22,15 +29,17 @@ object ExpoApplinksPlugin {
         initialLink = uri
       }
 
-      if (isSDKInitialized) {
-        try {
-          AppLinksSDK.getInstance().handleLink(uri)
-        } catch (e: Exception) {
-          // SDK not initialized yet
+      if (autoHandleLinks) {
+        if (isSDKInitialized) {
+          try {
+            AppLinksSDK.getInstance().handleLink(uri)
+          } catch (e: Exception) {
+            // SDK not initialized yet
+            pendingUrls.offer(uri)
+          }
+        } else {
           pendingUrls.offer(uri)
         }
-      } else {
-        pendingUrls.offer(uri)
       }
     }
   }

@@ -10,6 +10,7 @@ export type LinkHandlingResult = {
 export type AppLinksConfig = {
   apiKey: string;
   logLevel?: 'none' | 'error' | 'warning' | 'info' | 'debug';
+  autoHandleLinks?: boolean;
 };
 
 export type ExpoApplinksModuleEvents = {
