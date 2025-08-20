@@ -21,7 +21,7 @@ public class ExpoApplinksModule: Module {
       self.linkSubscription?.cancel()
     }
 
-    AsyncFunction("initialize") { (config: [String: Any]) in
+    Function("initialize") { (config: [String: Any]) in
       guard let apiKey = config["apiKey"] as? String else {
         throw Exception(name: "InvalidConfig", description: "API key is required")
       }

@@ -33,7 +33,7 @@ class ExpoApplinksModule : Module() {
       removeLinkListener()
     }
 
-    AsyncFunction("initialize") { config: Map<String, Any>, promise: Promise ->
+    Function("initialize") { config: Map<String, Any>, promise: Promise ->
       try {
         val apiKey = config["apiKey"] as? String ?: throw Exception("API key is required")
         val autoHandleLinks = config["autoHandleLinks"] as? Boolean ?: false
