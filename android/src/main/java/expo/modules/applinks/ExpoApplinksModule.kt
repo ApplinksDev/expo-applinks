@@ -37,6 +37,7 @@ class ExpoApplinksModule : Module() {
       try {
         val apiKey = config["apiKey"] as? String ?: throw Exception("API key is required")
         val autoHandleLinks = config["autoHandleLinks"] as? Boolean ?: false
+        val deferredDeepLinkingEnabled = config["deferredDeepLinkingEnabled"] as? Boolean ?: true
         
         val logLevel = when (config["logLevel"] as? String) {
           "none" -> "none"
@@ -61,6 +62,7 @@ class ExpoApplinksModule : Module() {
         // Initialize AppLinksSDK
         val sdk = AppLinksSDK.builder(context)
           .apiKey(apiKey)
+          .deferredDeepLinkingEnabled(deferredDeepLinkingEnabled)
           .apply {
             if (supportedDomains.isNotEmpty()) {
               supportedDomains(*supportedDomains.toTypedArray())
@@ -138,6 +140,28 @@ class ExpoApplinksModule : Module() {
         } catch (e: Exception) {
           promise.resolve(null)
         }
+      }
+    }
+
+    AsyncFunction("checkForDeferredDeepLink") { promise: Promise ->
+      try {
+        AppLinksSDK.getInstance().checkForDeferredDeepLink { result ->
+          if (result == null) {
+            promise.resolve(null)
+          } else {
+            val resultMap = mapOf(
+              "handled" to result.handled,
+              "originalUrl" to result.originalUrl.toString(),
+              "path" to result.path,
+              "params" to result.params,
+              "metadata" to result.metadata,
+              "error" to result.error
+            )
+            promise.resolve(resultMap)
+          }
+        }
+      } catch (e: Exception) {
+        promise.resolve(null)
       }
     }
 

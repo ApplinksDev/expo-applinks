@@ -7,6 +7,7 @@ declare class ExpoApplinksModule extends NativeModule<ExpoApplinksModuleEvents> 
   getVersion(): string;
   getInitialLink(): Promise<LinkHandlingResult | null>;
   getAppLinkDetails(url: string): Promise<LinkHandlingResult>;
+  checkForDeferredDeepLink(): Promise<LinkHandlingResult | null>;
   createLink(params: {
     domain: string,
     type: 'unguessable' | 'short',

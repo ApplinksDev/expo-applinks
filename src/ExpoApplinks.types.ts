@@ -11,6 +11,7 @@ export type AppLinksConfig = {
   apiKey: string;
   logLevel?: 'none' | 'error' | 'warning' | 'info' | 'debug';
   autoHandleLinks?: boolean;
+  deferredDeepLinkingEnabled?: boolean;
 };
 
 export type ExpoApplinksModuleEvents = {

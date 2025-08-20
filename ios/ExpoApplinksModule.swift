@@ -27,6 +27,7 @@ public class ExpoApplinksModule: Module {
       }
       
       let autoHandleLinks = config["autoHandleLinks"] as? Bool ?? false
+      let deferredDeepLinkingEnabled = config["deferredDeepLinkingEnabled"] as? Bool ?? true
       
       let logLevel: AppLinksSDKLogLevel
       if let logLevelString = config["logLevel"] as? String {
@@ -51,7 +52,8 @@ public class ExpoApplinksModule: Module {
         apiKey: apiKey,
         supportedDomains: supportedDomains,
         supportedSchemes: supportedSchemes,
-        logLevel: logLevel
+        logLevel: logLevel,
+        deferredDeepLinkingEnabled: deferredDeepLinkingEnabled
       )
       
       // Mark SDK as initialized and process any pending URLs
@@ -144,6 +146,21 @@ public class ExpoApplinksModule: Module {
         "params": handledLink.params,
         "metadata": handledLink.metadata,
         "error": handledLink.error as Any
+      ]
+    }
+    
+    AsyncFunction("checkForDeferredDeepLink") { () -> [String: Any]? in
+      guard let result = await AppLinksSDK.shared.checkForDeferredDeepLink() else {
+        return nil
+      }
+      
+      return [
+        "handled": result.handled,
+        "originalUrl": result.originalUrl.absoluteString,
+        "path": result.path,
+        "params": result.params,
+        "metadata": result.metadata,
+        "error": result.error as Any
       ]
     }
   }

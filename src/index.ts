@@ -44,6 +44,10 @@ export class AppLinks {
     return ExpoApplinksModule.getInitialLink();
   }
 
+  static checkForDeferredDeepLink(): Promise<LinkHandlingResult | null> {
+    return ExpoApplinksModule.checkForDeferredDeepLink();
+  }
+
   static addLinkListener(listener: (result: LinkHandlingResult) => void): () => void {
     const subscription = ExpoApplinksModule.addListener('onLinkHandled', listener);
     return () => subscription.remove();

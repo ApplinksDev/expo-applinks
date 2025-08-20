@@ -19,7 +19,7 @@ Pod::Spec.new do |s|
   s.static_framework = true
 
   s.dependency 'ExpoModulesCore'
-  s.dependency 'AppLinksSDK', '>= 1.0.8', '< 2.0'
+  s.dependency 'AppLinksSDK', '>= 1.0.10', '< 2.0'
 
   # Swift/Objective-C compatibility
   s.pod_target_xcconfig = {
