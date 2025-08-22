@@ -33,53 +33,49 @@ class ExpoApplinksModule : Module() {
       removeLinkListener()
     }
 
-    Function("initialize") { config: Map<String, Any>, promise: Promise ->
-      try {
-        val apiKey = config["apiKey"] as? String ?: throw Exception("API key is required")
-        val autoHandleLinks = config["autoHandleLinks"] as? Boolean ?: false
-        val deferredDeepLinkingEnabled = config["deferredDeepLinkingEnabled"] as? Boolean ?: true
-        
-        val logLevel = when (config["logLevel"] as? String) {
-          "none" -> "none"
-          "error" -> "error"
-          "warning" -> "warning"
-          "info" -> "info"
-          "debug" -> "debug"
-          else -> "info"
-        }
-        
-        val context = appContext.reactContext ?: throw Exceptions.AppContextLost()
-        
-        // Get plugin configuration from manifest
-        val metadata = context.packageManager.getApplicationInfo(
-          context.packageName,
-          android.content.pm.PackageManager.GET_META_DATA
-        ).metaData
-        
-        val supportedDomains = metadata?.getString("com.applinks.supportedDomains")?.split(",") ?: emptyList()
-        val supportedSchemes = metadata?.getString("com.applinks.supportedSchemes")?.split(",") ?: emptyList()
-        
-        // Initialize AppLinksSDK
-        val sdk = AppLinksSDK.builder(context)
-          .apiKey(apiKey)
-          .deferredDeepLinkingEnabled(deferredDeepLinkingEnabled)
-          .apply {
-            if (supportedDomains.isNotEmpty()) {
-              supportedDomains(*supportedDomains.toTypedArray())
-            }
-            if (supportedSchemes.isNotEmpty()) {
-              supportedSchemes(*supportedSchemes.toTypedArray())
-            }
-          }
-          .build()
-        
-        // Mark SDK as initialized and process any pending URLs
-        ExpoApplinksPlugin.markSDKInitialized(autoHandleLinks)
-        
-        promise.resolve(null)
-      } catch (e: Exception) {
-        promise.reject("InitializationError", e.message, e)
+    Function("initialize") { config: Map<String, Any> ->
+      val apiKey = config["apiKey"] as? String ?: throw Exception("API key is required")
+      val autoHandleLinks = config["autoHandleLinks"] as? Boolean ?: false
+      val deferredDeepLinkingEnabled = config["deferredDeepLinkingEnabled"] as? Boolean ?: true
+      
+      val logLevel = when (config["logLevel"] as? String) {
+        "none" -> "none"
+        "error" -> "error"
+        "warning" -> "warning"
+        "info" -> "info"
+        "debug" -> "debug"
+        else -> "info"
       }
+      
+      val context = appContext.reactContext ?: throw Exceptions.AppContextLost()
+      
+      // Get plugin configuration from manifest
+      val metadata = context.packageManager.getApplicationInfo(
+        context.packageName,
+        android.content.pm.PackageManager.GET_META_DATA
+      ).metaData
+      
+      val supportedDomains = metadata?.getString("com.applinks.supportedDomains")?.split(",") ?: emptyList()
+      val supportedSchemes = metadata?.getString("com.applinks.supportedSchemes")?.split(",") ?: emptyList()
+      
+      // Initialize AppLinksSDK
+      val sdk = AppLinksSDK.builder(context)
+        .apiKey(apiKey)
+        .deferredDeepLinkingEnabled(deferredDeepLinkingEnabled)
+        .apply {
+          if (supportedDomains.isNotEmpty()) {
+            supportedDomains(*supportedDomains.toTypedArray())
+          }
+          if (supportedSchemes.isNotEmpty()) {
+            supportedSchemes(*supportedSchemes.toTypedArray())
+          }
+        }
+        .build()
+      
+      // Mark SDK as initialized and process any pending URLs
+      ExpoApplinksPlugin.markSDKInitialized(autoHandleLinks)
+      
+      return@Function null
     }
 
     Function("getVersion") {
