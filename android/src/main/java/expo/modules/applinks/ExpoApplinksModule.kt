@@ -74,8 +74,6 @@ class ExpoApplinksModule : Module() {
       
       // Mark SDK as initialized and process any pending URLs
       ExpoApplinksPlugin.markSDKInitialized(autoHandleLinks)
-      
-      return@Function null
     }
 
     Function("getVersion") {
